@@ -1,4 +1,3 @@
-import Data.List
 -- func1 AH autumn 2023
 
 -- filter iterates through every index of the list
@@ -7,7 +6,8 @@ import Data.List
 -- if the remainder is 0 then the char is divisible by n, thus the eval is True
 -- otherwise the parameter's letter is filtered out from the a-z list
 charsDivisibleBy :: Int -> [Char]
-charsDivisibleBy n = filter (\c -> mod (fromEnum c - 96) n == 0) ['a'..'z']
+charsDivisibleBy 0 = []
+charsDivisibleBy n = filter (\c -> ((fromEnum c - 96) `mod` n) == 0) ['a'..'z']
 
 
 -- create a list of products, and filter the a-z list based on the list of products

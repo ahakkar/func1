@@ -1,26 +1,27 @@
 -- func1 AH autumn 2023
 
--- filter iterates through every index of the list
--- \c is the parameter currently being evaluated, like char a from index 0
--- the content after -> is the function, which evaluates either true or false
--- if the remainder is 0 then the char is divisible by n, thus the eval is True
--- otherwise the parameter's letter is filtered out from the a-z list
-charsDivisibleBy :: Int -> [Char]
-charsDivisibleBy 0 = []
-charsDivisibleBy n = filter (\c -> ((fromEnum c - 96) `mod` n) == 0) ['a'..'z']
 
+nextIsGreater :: [Int] -> [Int]
+nextIsGreater [] = []           -- empty list
+nextIsGreater [_] = []          -- only one element (nothing to compare)
+nextIsGreater (first : second : rest)                      -- breaks the list to 3 variables
+  | first < second = first : nextIsGreater (second : rest) -- check if next element is larger, and keep it if true
+  | otherwise = nextIsGreater (second : rest)              -- otherwise discard the element in first and continue recursion
 
--- create a list of products, and filter the a-z list based on the list of products
-charsProductOf :: [Int] -> [Char]
-charsProductOf lst = chars
-    where
-        -- list of all products of two individual numbers from the lst param
-        products = [x * y | x <- lst, y <- lst, x < y] 
-        -- chars where the number presentation equals a number from pairs list
-        chars = filter (\c -> (fromEnum c - 96) `elem` products) ['a'..'z']
+onlyDigits :: String -> Bool
+onlyDigits [] = False                   -- empty string
+onlyDigits [x] = x >= '0' && x <= '9'   -- handle last digit
+onlyDigits (first : rest)               -- break the 1st index to a separate variable
+    | first >= '0' && first <= '9' = onlyDigits rest        -- why not: isDigit first hlint(refract: use isDigit)
+    | otherwise                    = False                  -- well because these have to be done without IMPORTS..
 
-numsList :: [Int] -> [Int]
-numsList lst = lst2
-    where
-        -- list of all products of two individual numbers from the lst param
-        lst2 = [x * y | x <- lst, y <- lst, x < y] 
+{--
+imXort Data.Char (isDigit)
+
+onlyDigits2 :: String -> Bool
+onlyDigits2 [] = False          -- empty string
+onlyDigits2 [x] = isDigit x     -- handle last digit
+onlyDigits2 (first : rest)               -- break the 1st index to a separate variable
+    | isDigit first = onlyDigits2 rest   
+    | otherwise     = False              
+--}

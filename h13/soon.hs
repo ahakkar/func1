@@ -1,17 +1,40 @@
+import Dates
+
+data E = E {
+    e :: String,
+    p :: String,
+    t :: Date
+} deriving (Show, Eq)
 
 main :: IO ()
-main = do
+main = mainLoop []
+
+mainLoop :: [E] -> IO ()
+mainLoop initialEvents = do
     input <- getLine
     putStrLn $ "> " ++ input
     let split = splitOnSpace . trim $ input
-    putStrLn $ validateInput split
-    if input /= "quit" then main else return ()  
+    let (response, updatedEvents) = validateInput split initialEvents
+    putStrLn response
+    if input /= "quit" then mainLoop updatedEvents else return ()
+
+handleEvent :: [String] -> [E] -> (String, [E])
+handleEvent list events = ("Event", events)
+
+handleTell :: [String] -> [E] -> (String, [E])
+handleTell list events = ("Tell", events)
+
+handleOn :: [String] -> [E] -> (String, [E])
+handleOn list events = ("What on", events)
+
+handleAt :: [String] -> [E] -> (String, [E])
+handleAt list events = ("What at", events)
 
 -- really only haskell forces to write this kind of monsters
-validateInput :: [String] -> String
-validateInput list
+validateInput :: [String] -> [E]-> (String, [E])
+validateInput list events
     | length list == 1 && head list == "quit"
-        = "Bye"
+        = ("Bye", events)
     | length list == 7
         && list !! 0 == "Event"
         && not (null (list !! 1))
@@ -19,24 +42,24 @@ validateInput list
         && list !! 3 == "at"
         && not (null (list !! 4))
         && list !! 5 == "on"
-        && not (null (list !! 6)) = "Event"
+        && not (null (list !! 6)) = handleEvent list events
     | length list == 4
         && list !! 0 == "Tell"
         && list !! 1 == "me"
         && list !! 2 == "about"
-        && not (null (list !! 3)) = "Tell"
+        && not (null (list !! 3)) = handleTell list events
     | length list == 4
         && list !! 0 == "What"
         && list !! 1 == "happens"
         && list !! 2 == "on"
-        && not (null (list !! 3)) = "What on"
+        && not (null (list !! 3)) = handleOn list events
     | length list == 4
         && list !! 0 == "What"
         && list !! 1 == "happens"
         && list !! 2 == "at"
-        && not (null (list !! 3)) = "What at"
+        && not (null (list !! 3)) = handleAt list events
     | otherwise 
-        = "I do not understand that. I understand the following:\n*Event <name> happens at <place> on <date>\n*Tell me about <eventname>\n*What happens on <date>\n*What happens at <place>\n*Quit"
+        = ("I do not understand that. I understand the following:\n*Event <name> happens at <place> on <date>\n*Tell me about <eventname>\n*What happens on <date>\n*What happens at <place>\n*Quit", events)
 
 -- stuff that should really be included by defualt
 -- why must i write this

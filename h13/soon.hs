@@ -27,8 +27,16 @@ handleTell list events = ("Tell", events)
 handleOn :: [String] -> [E] -> (String, [E])
 handleOn list events = ("What on", events)
 
+-- Event Event G1 happens at Place G
 handleAt :: [String] -> [E] -> (String, [E])
-handleAt list events = ("What at", events)
+handleAt ll ee = 
+    let mE = filter (\event -> p event == ll !! 3) ee
+    in if null mE
+        then ("Nothing that I know of", ee)
+        else (foldr (\event acc -> fE event ++ "\n" ++ acc) "" mE, ee)
+
+fE :: E -> String
+fE ee = "Event " ++ e ee ++ " happens at " ++ p ee
 
 -- really only haskell forces to write this kind of monsters
 validateInput :: [String] -> [E]-> (String, [E])

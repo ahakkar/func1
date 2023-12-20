@@ -1,0 +1,8 @@
+Event 'Event A' happens at 'Place A1' on '2001-02-02'
+Event 'Event A' happens at 'Place A1' on '2001-02-03'
+Event 'Event A' happens at 'Place A2' on '2001-02-03'
+Event 'Event G1' happens at 'Place G' on '2008-02-02'
+Event 'Event G21' happens at 'Place G' on '2008-02-02'
+Event 'Event G22' happens at 'Place G' on '2001-02-03'
+Event 'Event G5' happens at 'Place G' on '2011-02-02'
+Event 'Event A' happens at 'Place A1' on '2001-20-40'

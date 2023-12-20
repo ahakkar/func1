@@ -1,4 +1,6 @@
+-- func1 AH autumn 2023
 import Dates
+import Data.List (sortBy)
 
 data E = E {
     e :: String,
@@ -11,14 +13,14 @@ main = mainLoop []
 
 mainLoop :: [E] -> IO ()
 mainLoop initialEvents = do
-    mapM_ (putStrLn . show) initialEvents
+    -- mapM_ (putStrLn . show) initialEvents
     input <- getLine
     putStrLn $ "> " ++ input
     let split = splitInput . trim $ input
     -- putStrLn $ unlines split
     let (response, updatedEvents) = validateInput split initialEvents
     putStrLn response
-    if input /= "quit" then mainLoop updatedEvents else return ()
+    if input /= "Quit" then mainLoop updatedEvents else return ()
 
 -- e: 1, p: 4, d: 6
 handleEvent :: [String] -> [E] -> (String, [E])
@@ -48,8 +50,8 @@ handleTell :: [String] -> [E] -> (String, [E])
 handleTell ll ee = 
     let mE = filter (\event -> e event == ll !! 3) ee
     in if null mE
-        then ("I do not know of such event " ++ ll !! 3, ee)
-        else (foldr (\event acc -> fE2 event ++ "\n" ++ acc) "" mE, ee)
+        then ("I do not know of such event", ee)
+        else (foldr (\event acc -> fE2 event ++ acc) "" mE, ee)
 
 fE2 :: E -> String
 fE2 ee = "Event " ++ e ee ++ " happens at " ++ p ee ++ " on " ++ show (d ee)
@@ -58,10 +60,12 @@ handleOn :: [String] -> [E] -> (String, [E])
 handleOn ll ee =
     case parseDate (last ll) of
         Just date ->
-            let mE = filter (\event -> d event == date) ee
+            let se = sortBy cmp ee
+                mE = filter (\event -> d event == date) se
+                eventDescs = map fE3 mE
             in if null mE
-                then ("Nothing that I know of", ee)
-                else (foldr (\event acc -> fE3 event ++ "\n" ++ acc) "" mE, ee)
+                then ("Nothing that I know of", se)
+                else (intercalate eventDescs, se)
         Nothing -> ("Bad date", ee)
 
 fE3 :: E -> String
@@ -70,18 +74,19 @@ fE3 ee = "Event " ++ e ee ++ " happens on " ++ show (d ee)
 -- Event Event G1 happens at Place G
 handleAt :: [String] -> [E] -> (String, [E])
 handleAt ll ee = 
-    let mE = filter (\event -> p event == ll !! 3) ee
+    let se = sortBy cmp ee
+        mE = filter (\event -> p event == ll !! 3) se
+        eventDescs = map fE1 mE
     in if null mE
-        then ("Nothing that I know of", ee)
-        else (foldr (\event acc -> fE1 event ++ "\n" ++ acc) "" mE, ee)
+        then ("Nothing that I know of", se)
+        else (intercalate eventDescs, se)
 
 fE1 :: E -> String
 fE1 ee = "Event " ++ e ee ++ " happens at " ++ p ee
 
--- really only haskell forces to write this kind of monsters
 validateInput :: [String] -> [E]-> (String, [E])
 validateInput list events
-    | length list == 1 && head list == "quit"
+    | length list == 1 && head list == "Quit"
         = ("Bye", events)
     | length list == 7
         && list !! 0 == "Event"
@@ -109,30 +114,24 @@ validateInput list events
     | otherwise 
         = ("I do not understand that. I understand the following:\n*Event <name> happens at <place> on <date>\n*Tell me about <eventname>\n*What happens on <date>\n*What happens at <place>\n*Quit", events)
 
-parseDate :: String -> Maybe Date
-parseDate str = case map read $ wordsWhen (=='-') str of
-    [y, m, d] -> Just $ makeDate y m d
-    _ -> Nothing
+cmp :: E -> E -> Ordering
+cmp a b = compare (e a) (e b)
 
-wordsWhen :: (Char -> Bool) -> String -> [String]
-wordsWhen p s = case dropWhile p s of
-    "" -> []
-    s' -> w : wordsWhen p s''
-          where (w, s'') = break p s'
+intercalate :: [String] -> String
+intercalate [] = ""
+intercalate [x] = x
+intercalate (x:xs) = x ++ "\n" ++ intercalate xs
 
 isSpace :: Char -> Bool
 isSpace c = c == ' ' || c == '\n' || c == '\t'
 
-trim :: String -> String
-trim = f . f
-   where f = reverse . dropWhile isSpace
-
-splitOnSpace :: String -> [String]
-splitOnSpace [] = []
-splitOnSpace str = word : splitOnSpace rest
-  where
-    word = takeWhile (/= ' ') str
-    rest = dropWhile (== ' ') . dropWhile (/= ' ') $ str
+parseDate :: String -> Maybe Date
+parseDate str = case map read $ wordsWhen (=='-') str of
+    [y, m, d] ->
+        if correctDate y m d
+        then Just $ makeDate y m d
+        else Nothing
+    _ -> Nothing
 
 splitInput :: String -> [String]
 splitInput input = go input False ""
@@ -144,3 +143,13 @@ splitInput input = go input False ""
             if null acc then go cs inQuotes "" 
             else acc : go cs inQuotes ""
         | otherwise = go cs inQuotes (acc ++ [c])
+
+trim :: String -> String
+trim = f . f
+   where f = reverse . dropWhile isSpace
+
+wordsWhen :: (Char -> Bool) -> String -> [String]
+wordsWhen p s = case dropWhile p s of
+    "" -> []
+    s' -> w : wordsWhen p s''
+          where (w, s'') = break p s'

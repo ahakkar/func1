@@ -1,0 +1,43 @@
+> Event 'Event A' happens at 'Place A1' on '2001-02-02'
+Ok
+> Event 'Event A' happens at 'Place A1' on '2001-02-03'
+Ok
+> Event 'Event A' happens at 'Place A2' on '2001-02-03'
+Ok
+> Event 'Event G1' happens at 'Place G' on '2008-02-02'
+Ok
+> Event 'Event G21' happens at 'Place G' on '2008-02-02'
+Ok
+> Event 'Event G22' happens at 'Place G' on '2001-02-03'
+Ok
+> Event 'Event G5' happens at 'Place G' on '2011-02-02'
+Ok
+> Event 'Event A' happens at 'Place A1' on '2001-20-40'
+Bad date
+> Tell me about 'Event ABC'
+I do not know of such event
+> Tell me about 'Event A'
+Event Event A happens at Place A2 on 2001-02-03
+> Tell me 'Place A'
+I do not understand that. I understand the following:
+*Event <name> happens at <place> on <date>
+*Tell me about <eventname>
+*What happens on <date>
+*What happens at <place>
+*Quit
+> What happens on '2001-02-02'
+Nothing that I know of
+> What happens on '2001-02-03'
+Event Event G22 happens on 2001-02-03
+Event Event A happens on 2001-02-03
+> What happens at 'Place A1'
+Nothing that I know of
+> What happens at 'Place A2'
+Event Event A happens at Place A2
+> What happens at 'Place G'
+Event Event G5 happens at Place G
+Event Event G22 happens at Place G
+Event Event G21 happens at Place G
+Event Event G1 happens at Place G
+> Quit
+Bye

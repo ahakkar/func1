@@ -11,9 +11,11 @@ main = mainLoop []
 
 mainLoop :: [E] -> IO ()
 mainLoop initialEvents = do
+    mapM_ (putStrLn . show) initialEvents
     input <- getLine
     putStrLn $ "> " ++ input
-    let split = splitOnSpace . trim $ input
+    let split = splitInput . trim $ input
+    -- putStrLn $ unlines split
     let (response, updatedEvents) = validateInput split initialEvents
     putStrLn response
     if input /= "quit" then mainLoop updatedEvents else return ()
@@ -21,7 +23,7 @@ mainLoop initialEvents = do
 -- e: 1, p: 4, d: 6
 handleEvent :: [String] -> [E] -> (String, [E])
 handleEvent ll ee =
-    case parseDate (last ll) of
+    case parseDate (ll !! 6) of
         Just date ->
             let nE = E { e = ll !! 1, p = ll !! 4, d = date }
                 uE = aOUE nE ee
@@ -44,9 +46,9 @@ aOUE nE ee =
 
 handleTell :: [String] -> [E] -> (String, [E])
 handleTell ll ee = 
-    let mE = filter (\event -> p event == ll !! 3) ee
+    let mE = filter (\event -> e event == ll !! 3) ee
     in if null mE
-        then ("I do not know of such event", ee)
+        then ("I do not know of such event " ++ ll !! 3, ee)
         else (foldr (\event acc -> fE2 event ++ "\n" ++ acc) "" mE, ee)
 
 fE2 :: E -> String
@@ -118,20 +120,27 @@ wordsWhen p s = case dropWhile p s of
     s' -> w : wordsWhen p s''
           where (w, s'') = break p s'
 
--- stuff that should really be included by defualt
--- why must i write this
 isSpace :: Char -> Bool
 isSpace c = c == ' ' || c == '\n' || c == '\t'
 
--- really why i must write this too
 trim :: String -> String
 trim = f . f
    where f = reverse . dropWhile isSpace
 
--- writing functions like this in 2023 is utterly ridiculous
 splitOnSpace :: String -> [String]
 splitOnSpace [] = []
 splitOnSpace str = word : splitOnSpace rest
   where
     word = takeWhile (/= ' ') str
     rest = dropWhile (== ' ') . dropWhile (/= ' ') $ str
+
+splitInput :: String -> [String]
+splitInput input = go input False ""
+  where
+    go [] _ acc = [acc]
+    go (c:cs) inQuotes acc
+        | c == '\'' = go cs (not inQuotes) acc
+        | isSpace c && not inQuotes = 
+            if null acc then go cs inQuotes "" 
+            else acc : go cs inQuotes ""
+        | otherwise = go cs inQuotes (acc ++ [c])
